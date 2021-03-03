@@ -57,7 +57,7 @@ public class Classifier {
 
     private void inittflite(Activity activity) throws IOException {
         // Creating the model using tflite model
-        AssetFileDescriptor fileDescriptor=activity.getAssets().openFd("newmodel.tflite");
+        AssetFileDescriptor fileDescriptor=activity.getAssets().openFd("modelv2.2.tflite");
         FileInputStream inputStream=new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel=inputStream.getChannel();
         long startoffset = fileDescriptor.getStartOffset();
@@ -97,7 +97,7 @@ public class Classifier {
         ImageProcessor imageProcessor =
                 new ImageProcessor.Builder() // Initializing an Image Process pipeline
                         //.add(new ResizeWithCropOrPadOp(cropSize, cropSize))
-                        .add(new ResizeOp(600, 800, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR)) // Resize picture
+                        .add(new ResizeOp(320, 320, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR)) // Resize picture
                         .add(getPreprocessNormalizeOp()) // Normalize pixel values
                         .build();
         return imageProcessor.process(inputImageBuffer); // Processing the image using the pipeline
