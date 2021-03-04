@@ -4,11 +4,15 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Environment;
 
 import android.widget.Toast;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -28,108 +32,92 @@ import javax.mail.internet.MimeMultipart;
 
 public class Mail extends AsyncTask<Void,Void,Void> {
 
-    private Context context;//İçerik tanımı
-    private Session session;
-    public String email="girayserter1@gmail.com";
-    public String subject="Araç Gaz Ölçüm Verileri";
-    public String message="Veriler";//Gönderilecek email tanımı
-    private ProgressDialog Dialog;//Uyarı ekranı tanımı
+    private Context context;//Context
+    private Session session;//Session
+    public String email="info@compositeware.com";//Send to this email
+    public String subject="Screenshots";//Email subject
+    public String message="Screenshots from the last recording sessions has been attached";//Text part of email
 
+    //Constructor
     public Mail(Context context){
         this.context=context;
-
     }
 
-    public Mail(Context context,ProgressDialog dialog){
-        this.context=context;
-        this.Dialog=dialog;
-    }
 
-    //Mail gönderilirken arkaplanda çalışacak işlemler
+    //Background tasks while sending mail
     @Override
     protected Void doInBackground(Void... params) {
         Properties props=new Properties();
 
-        //Smtp sunucu bilgileri
+        //Smtp server Sendinblue
+        props.setProperty("mail.transport.protocol", "smtp");//SMTP protocol
+        props.setProperty("mail.host", "smtp-relay.sendinblue.com");//Host address
+        props.put("mail.smtp.auth", "true");//Authorization enabled
+        props.put("mail.smtp.port", "587");//Port
+        //props.put("mail.smtp.socketFactory.port", "465");//Port for SSL(works poorly)
+        //props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        //props.put("mail.smtp.socketFactory.fallback", "false");
+        props.setProperty("mail.smtp.quitwait", "false");
+
+
+        /*//Smtp server Elasticemail
         props.setProperty("mail.transport.protocol", "smtp");
-        props.setProperty("mail.host", "in-v3.mailjet.com");
+        props.setProperty("mail.host", "smtp.elasticemail.com");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.port", "465");
         props.put("mail.smtp.socketFactory.port", "465");
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.socketFactory.fallback", "false");
-        props.setProperty("mail.smtp.quitwait", "false");
+        props.setProperty("mail.smtp.quitwait", "false");*/
 
-        //Smtp sunucu kullanıcı şifre bilgisi
+
+
+        //Smtp server user pass
         session=Session.getDefaultInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("89fb05c328418821f8c261b13b4de697","d22e7a81f5eb48947710bce04e426507");
+                return new PasswordAuthentication("info@compositeware.com","RUAXL3GBaVThrKgt");//Sendinblue
+                //return new PasswordAuthentication("info@compositeware.com","E61543514485AF5B97DD0E3CCB414573CD93");//Elasticemail
             }
         });
 
-        //Mail gönderme komutları
+        //Mail sending commands
         try{
-            MimeMessage mimeMessage=new MimeMessage(session);
-            mimeMessage.setFrom(new InternetAddress("info@compositeware.com"));
-            mimeMessage.addRecipient(Message.RecipientType.TO,new InternetAddress(email));
-            mimeMessage.setSubject(subject);
-            mimeMessage.setText(message);
+            MimeMessage mimeMessage=new MimeMessage(session);//New mail
+            mimeMessage.setFrom(new InternetAddress("info@compositeware.com"));//From
+            mimeMessage.addRecipient(Message.RecipientType.TO,new InternetAddress(email));//To
+            mimeMessage.setSubject(subject);//Subject
+            mimeMessage.setText(message);//Message
 
 
-            Multipart multipart = new MimeMultipart();
+            Multipart multipart = new MimeMultipart();//Adding parts to mail
 
+            File folder = new File(Environment.getExternalStorageDirectory() + File.separator + "Parental_Control_Screenshots");//Folder that keeps screenshots
+            if (!folder.exists()) {//If folder doesn't exist
+                folder.mkdirs();//Create folder
+            }
 
-            MimeBodyPart imgPart1 = new MimeBodyPart();
-            String file = Environment.getExternalStorageDirectory() + "/Cariqveri/CO2.png";
-            String fileName = "CO2.png";
-            DataSource source = new FileDataSource(file);
-            imgPart1.setDataHandler(new DataHandler(source));
-            imgPart1.setFileName(fileName);
-            multipart.addBodyPart(imgPart1);
+            File[] imageFiles = folder.listFiles();//Getting list of files in folder
+            for (int i = 0; i < imageFiles.length; i++) {//for all files in folder
+                MimeBodyPart imgPart = new MimeBodyPart();//Image part for mail
+                String file = imageFiles[i].getAbsolutePath();//Get image file
+                String fileName = imageFiles[i].getName();//Get image name
+                DataSource source = new FileDataSource(file);//Data source
+                imgPart.setDataHandler(new DataHandler(source));//Handler for data
+                imgPart.setFileName(fileName);//Setting image file name
+                multipart.addBodyPart(imgPart);//Add image to mail
+            }
 
-            MimeBodyPart imgPart2 = new MimeBodyPart();
-            String file2 = Environment.getExternalStorageDirectory() + "/Cariqveri/O2.png";
-            String fileName2 = "O2.png";
-            DataSource source2 = new FileDataSource(file2);
-            imgPart2.setDataHandler(new DataHandler(source2));
-            imgPart2.setFileName(fileName2);
-            multipart.addBodyPart(imgPart2);
+            MimeBodyPart textPart = new MimeBodyPart();//Text part for mail
+            textPart.setText(message);//Setting text as message
+            multipart.addBodyPart(textPart);//Add text to mail
 
-            MimeBodyPart imgPart3 = new MimeBodyPart();
-            String file3 = Environment.getExternalStorageDirectory() + "/Cariqveri/CO.png";
-            String fileName3 = "CO.png";
-            DataSource source3 = new FileDataSource(file3);
-            imgPart3.setDataHandler(new DataHandler(source3));
-            imgPart3.setFileName(fileName3);
-            multipart.addBodyPart(imgPart3);
-
-            MimeBodyPart imgPart4 = new MimeBodyPart();
-            String file4 = Environment.getExternalStorageDirectory() + "/Cariqveri/NOx.png";
-            String fileName4 = "NOx.png";
-            DataSource source4 = new FileDataSource(file4);
-            imgPart4.setDataHandler(new DataHandler(source4));
-            imgPart4.setFileName(fileName4);
-            multipart.addBodyPart(imgPart4);
-
-            MimeBodyPart csvPart = new MimeBodyPart();
-            String file5 = "/data/data/com.car.iq/files/Veriler.csv";
-            String fileName5 = "Veriler.csv";
-            DataSource source5 = new FileDataSource(file5);
-            csvPart.setDataHandler(new DataHandler(source5));
-            csvPart.setFileName(fileName5);
-            multipart.addBodyPart(csvPart);
-
-            MimeBodyPart textPart = new MimeBodyPart();
-            textPart.setText(message);
-            multipart.addBodyPart(textPart);
-
-            mimeMessage.setContent(multipart);
-            Transport.send(mimeMessage);
+            mimeMessage.setContent(multipart);//Set mail content
+            Transport.send(mimeMessage);//Send mail
 
         }
 
-        //Exception yakalama
+        //Exception
         catch (MessagingException e){
             e.printStackTrace();
         }
@@ -140,29 +128,24 @@ public class Mail extends AsyncTask<Void,Void,Void> {
         return null;
     }
 
-    //İşlem tamamlandığındaki uyarı ekranı
+    //Toast on sending completed
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        broadcastUpdate("Mail_Gonderildi");
-        Toast.makeText(context,"Mail Gönderildi",Toast.LENGTH_LONG).show();
-        //Dialog.dismiss();
+        broadcastUpdate("Mail_Sent");//Broadcast to close dialog
+        Toast.makeText(context,"Mail Sent",Toast.LENGTH_LONG).show();//Toast
     }
 
-    //İşlem başlangıcındaki uyarı ekranı
+    //Before executing mail sending
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        /*Dialog.setMessage("Mail gönderiliyor...");
-        Dialog.show();*/
     }
 
+    //Broadcast updater
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
         context.sendBroadcast(intent);
     }
-
-
-
 
 }

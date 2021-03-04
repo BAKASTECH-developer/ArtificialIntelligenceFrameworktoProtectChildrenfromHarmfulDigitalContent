@@ -8,6 +8,9 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,12 +40,14 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -58,6 +63,7 @@ public class HomePageActivity extends AppCompatActivity {
     ImageView lastScreenshot;//gallery grid view
     GridViewAdapter customGridAdapter;//Adapter for gallery grid view
     Button btn_startStop;//Start Stop button
+    TextView classifierResultText;
     MediaProjection mProjection;//Media Projection variable for screenshot
     int mWidth ;//Screen width
     int mHeight ;//Screen height
@@ -68,6 +74,7 @@ public class HomePageActivity extends AppCompatActivity {
     Handler gwRefreshHandler = new Handler();//Timer for refreshing gallery timed to 1 sec
     public static ScreenshotService screenshotService;//Screenshot service that runs in background and takes screenshots
     private static boolean mServiceConnected;//Boolean value that shows if screenshot service is connected
+    ProgressDialog dialog;//Mail sending dialog
 
     //Connects service
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -111,6 +118,7 @@ public class HomePageActivity extends AppCompatActivity {
         //Items from xml file
         lastScreenshot=findViewById(R.id.lastScreenshotImage);
         btn_startStop=findViewById(R.id.btn_start_stop);
+        classifierResultText=findViewById(R.id.classifierResultText);
 
         //Starting gallery refreshing
         startRefreshHandler();
@@ -140,6 +148,7 @@ public class HomePageActivity extends AppCompatActivity {
                     startStopState=0;//Set state as stop
                     btn_startStop.setText("Start");//Set button text as Start
                     screenshotService.stopScreenshot();//Stop taking screenshots
+                    sendEmail();//Send email on stop
                 }
             }
         });
@@ -152,11 +161,15 @@ public class HomePageActivity extends AppCompatActivity {
         if(screenshotService==null){//If no services bound
             doBindService();//Bind service
         }
+        final IntentFilter filter = new IntentFilter();// Intent filter
+        filter.addAction("Mail_Sent");//Action mail sent
+        registerReceiver(mailUpdateReceiver, filter);//Registering the broadcast receiver
     }
 
     //On activity pause
     @Override
     protected void onPause() {
+        unregisterReceiver(mailUpdateReceiver);//Unregistering the broadcast receiver
         super.onPause();
     }
 
@@ -203,10 +216,11 @@ public class HomePageActivity extends AppCompatActivity {
         }
 
         File[] imageFiles = folder.listFiles();//Getting list of files in folder
-        Bitmap bitmap = BitmapFactory.decodeFile(imageFiles[imageFiles.length-1].getAbsolutePath());//Create bitmap from pictures
-
-        lastScreenshot.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 600, 800, false));//Resizing to 800x600
-
+        if(imageFiles.length>0) {
+            Bitmap bitmap = BitmapFactory.decodeFile(imageFiles[imageFiles.length - 1].getAbsolutePath());//Create bitmap from pictures
+            lastScreenshot.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 600, 800, false));//Resizing to 800x600
+            classifierResultText.setVisibility(View.VISIBLE);//Set prediction result text visible
+        }
     }
 
     //Loop that refreshing gallery every 1 sec
@@ -225,4 +239,54 @@ public class HomePageActivity extends AppCompatActivity {
             }
         }, 1000);//1 sec delay
     }
+
+    //Sending email of screenshots
+    public void sendEmail()
+    {
+        //Opening progress dialog with text sending mail
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Sending mail...");
+        dialog.show();
+
+        Handler handler1 = new Handler();//Timer to wait before mail sending due to problems can occur while stopping screenshot
+        handler1.postDelayed(new Runnable() {
+            public void run() {
+                Mail mail =new Mail(HomePageActivity.this);//Create mail object
+                mail.execute();//Execute mail sending
+            }
+        }, 1000);   //1 seconds
+
+    }
+
+    //Deletes all screenshots saved
+    private void deleteScreenshots(){
+        //Picture folder path
+        File folder = new File(Environment.getExternalStorageDirectory() + File.separator + "Parental_Control_Screenshots");
+        if (!folder.exists()) {//If folder doesn't exist
+            return;
+        }
+
+        File[] imageFiles = folder.listFiles();//Getting list of files in folder
+        for(int i=imageFiles.length-1;i>=0;i--){
+            imageFiles[i].delete();//Delete file
+        }
+    }
+
+
+    //Listening the broadcasts
+    private final BroadcastReceiver mailUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            switch (action) {
+                case "Mail_Sent"://Case of mail sending completed
+                    dialog.dismiss();//Close dialog
+                    deleteScreenshots();//Delete screenshots
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    };
 }

@@ -37,12 +37,16 @@ import android.view.WindowManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import bakas.it.artificialintelligenceframeworktoprotectchildrenfromharmfuldigitalcontent.classifier.Classifier;
 
 public class ScreenshotService extends Service {
 
@@ -53,6 +57,8 @@ public class ScreenshotService extends Service {
     MediaProjection mProjection;//Media Projection variable for screenshot
     Handler screenshotHandler = new Handler();//Timer for screenshot timed to 10 sec
     private final IBinder mBinder = new LocalBinder();//Gets current service object
+    String logs="";//Text that will be written to log file
+    Classifier classifier=new Classifier();//Classifier object
 
     public ScreenshotService() {//Empty constructor
     }
@@ -70,16 +76,6 @@ public class ScreenshotService extends Service {
     }
 
 
-
-    /*public String readData() {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
-            return "hata";
-        }
-        mBluetoothGatt.readCharacteristic(mWDataCharacteristic);
-        return okunanData;
-    }
-*/
     //Starts auto screenshot and takes a screenshot every 10 secs
     public boolean initialize(MediaProjection mProjection) {
 
@@ -89,6 +85,7 @@ public class ScreenshotService extends Service {
             @Override
             public void run() {
                 startScreenshot();//Start taking screenshots
+                logs+="Safe\n";//Adding a new line to logs
                 screenshotHandler.postDelayed(this,10000);//creating loop with 10 secs delay
             }
         }, 10000);//10 secs delay
@@ -109,7 +106,12 @@ public class ScreenshotService extends Service {
         if (file.exists()) file.delete ();//Overwriting file if file already exist
         try {//Compress bitmap and write to file
             FileOutputStream out = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);//Saving screenshot
+            Bitmap bmp=Bitmap.createScaledBitmap(bitmap, 600, 800, false);//Resizing to 800x600
+            bmp=Bitmap.createBitmap(bmp, 0,100,600, 600);//Cropping top 100 and bottom 100 pixels
+            bmp=Bitmap.createScaledBitmap(bmp, 320, 320, false);//Resizing to 320x320
+            classifier.classify(bmp);//Sending 320x320 bitmap to classifier
+            System.out.println(classifier.predict());//Writing out the result of prediction
             out.flush();
             out.close();
         } catch (Exception e) {
@@ -120,6 +122,7 @@ public class ScreenshotService extends Service {
     //Gets media projection and placing it on image reader then saving it
     @SuppressLint("WrongConstant")
     public void startScreenshot(){
+        classifier.initialize();
         final MediaProjection Projection=mProjection;//copying the projection
         WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);//Getting device window manager
         Display display = wm.getDefaultDisplay();//Display variable
@@ -171,5 +174,20 @@ public class ScreenshotService extends Service {
     public void stopScreenshot(){
         screenshotHandler.removeCallbacksAndMessages(null);
         mProjection.stop();//Stopping screen capture
+        createLogFile();//Creating log file
+    }
+
+    //Creates log file with logs string and timestamp as name
+    public void createLogFile(){
+        try {
+            String timeStamp = new SimpleDateFormat("ddMM-HHmm").format(new Date());//Getting timestamp
+            String fname = "BBPC-"+ timeStamp +".txt";//File name
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(MyApplication.getInstance().openFileOutput(fname, Context.MODE_PRIVATE));//File writer
+            outputStreamWriter.write(logs);//Writing logs to file
+            outputStreamWriter.close();//Close writer
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File writing failed: " + e.toString());
+        }
     }
 }
