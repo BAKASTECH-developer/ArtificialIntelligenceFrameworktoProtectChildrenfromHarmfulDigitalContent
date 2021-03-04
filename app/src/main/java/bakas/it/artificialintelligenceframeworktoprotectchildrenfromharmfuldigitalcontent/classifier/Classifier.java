@@ -40,9 +40,9 @@ public class Classifier {
     public  TensorBuffer outputProbabilityBuffer;
     public  TensorProcessor probabilityProcessor;
     private static final float IMAGE_MEAN = 0.0f;
-    private static final float IMAGE_STD = 1.0f;
+    private static final float IMAGE_STD = 255.0f;
     private static final float PROBABILITY_MEAN = 0.0f;
-    private static final float PROBABILITY_STD = 255.0f;
+    private static final float PROBABILITY_STD = 1.0f;
     private List<String> labels;
 
 
@@ -106,7 +106,6 @@ public class Classifier {
     }
 
     // Some functions for normalizing image pixel values. Other methods can be added.
-    // We should add a simple /255.0 normalizer here.
     private TensorOperator getPreprocessNormalizeOp() {
         return new NormalizeOp(IMAGE_MEAN, IMAGE_STD);
     }
