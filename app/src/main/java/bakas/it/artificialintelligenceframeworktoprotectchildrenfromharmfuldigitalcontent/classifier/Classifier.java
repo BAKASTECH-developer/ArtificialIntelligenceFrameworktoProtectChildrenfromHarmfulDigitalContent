@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import bakas.it.artificialintelligenceframeworktoprotectchildrenfromharmfuldigitalcontent.MyApplication;
+
 public class Classifier {
     protected Interpreter tflite;
     private MappedByteBuffer tfliteModel;
@@ -42,22 +44,22 @@ public class Classifier {
     private static final float PROBABILITY_MEAN = 0.0f;
     private static final float PROBABILITY_STD = 255.0f;
     private List<String> labels;
-    public Activity activity;
+
 
     public Classifier(){
     }
 
     public void initialize(){
         try{
-            inittflite(activity);
+            inittflite();
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    private void inittflite(Activity activity) throws IOException {
+    private void inittflite() throws IOException {
         // Creating the model using tflite model
-        AssetFileDescriptor fileDescriptor=activity.getAssets().openFd("modelv2.2.tflite");
+        AssetFileDescriptor fileDescriptor= MyApplication.getInstance().getAssets().openFd("modelv2.2.tflite");
         FileInputStream inputStream=new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel=inputStream.getChannel();
         long startoffset = fileDescriptor.getStartOffset();
@@ -116,7 +118,7 @@ public class Classifier {
         String max_label = "No Results"; // Initializing a prediction label.
 
         try{
-            labels = FileUtil.loadLabels(activity,"newdict.txt"); // Read labels from newdict.txt inside assets folder.
+            labels = FileUtil.loadLabels( MyApplication.getInstance(),"newdict.txt"); // Read labels from newdict.txt inside assets folder.
         }catch (Exception e){
             e.printStackTrace();
         }

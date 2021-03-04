@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Initializing classifier object that will produce predictions from pictures
-        classifier.activity = this;
         classifier.initialize();
 
         buclassify.setOnClickListener(new View.OnClickListener() {
