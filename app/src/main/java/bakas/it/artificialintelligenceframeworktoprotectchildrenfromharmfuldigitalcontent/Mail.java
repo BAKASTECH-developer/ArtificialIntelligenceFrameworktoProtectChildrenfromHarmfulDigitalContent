@@ -38,7 +38,7 @@ public class Mail extends AsyncTask<Void,Void,Void> {
 
     private Context context;//Context
     private Session session;//Session
-    public String email="info@compositeware.com";//Send to this email
+    public String email="girayserter1@gmail.com";//Send to this email
     public String subject="Screenshots";//Email subject
     public String message="Screenshots from the last recording sessions has been attached";//Text part of email
 
@@ -53,39 +53,34 @@ public class Mail extends AsyncTask<Void,Void,Void> {
     protected Void doInBackground(Void... params) {
         Properties props=new Properties();
 
-        //Smtp server Sendinblue
+        /*//Smtp server Sendinblue
         props.setProperty("mail.transport.protocol", "smtp");//SMTP protocol
         props.setProperty("mail.host", "smtp-relay.sendinblue.com");//Host address
         props.put("mail.smtp.auth", "true");//Authorization enabled
         props.put("mail.smtp.port", "587");//Port
-        //props.put("mail.smtp.socketFactory.port", "465");//Port for SSL(works poorly)
-        //props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        //props.put("mail.smtp.socketFactory.fallback", "false");
-        props.setProperty("mail.smtp.quitwait", "false");
+        props.setProperty("mail.smtp.quitwait", "false");*/
 
 
         /*//Smtp server Elasticemail
         props.setProperty("mail.transport.protocol", "smtp");
         props.setProperty("mail.host", "smtp.elasticemail.com");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.port", "465");
-        props.put("mail.smtp.socketFactory.port", "465");
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.socketFactory.fallback", "false");
+        props.put("mail.smtp.port", "2525");
         props.setProperty("mail.smtp.quitwait", "false");*/
 
-
+        //Smtp server Mailjet
+        props.setProperty("mail.transport.protocol", "smtp");
+        props.setProperty("mail.host", "in-v3.mailjet.com");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.port", "587");
+        props.setProperty("mail.smtp.quitwait", "false");
 
 
         //Smtp server user pass
         session=Session.getDefaultInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                System.out.println(MyApplication.getInstance().getResources().getString(R.string.au)+ MyApplication.getInstance().getResources().getString(R.string.pablue));
-
-                return new PasswordAuthentication(MyApplication.getInstance().getResources().getString(R.string.au), MyApplication.getInstance().getResources().getString(R.string.pablue));//Sendinblue
-                //return new PasswordAuthentication(Resources.getSystem().getString(R.string.au),Resources.getSystem().getString(R.string.paela));//Elasticemail
-
+                return new PasswordAuthentication("user","pass");
             }
         });
 
