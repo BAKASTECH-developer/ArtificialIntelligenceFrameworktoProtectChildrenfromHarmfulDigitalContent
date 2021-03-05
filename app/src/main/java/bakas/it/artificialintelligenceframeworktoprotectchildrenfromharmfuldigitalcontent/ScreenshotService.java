@@ -179,15 +179,25 @@ public class ScreenshotService extends Service {
 
     //Creates log file with logs string and timestamp as name
     public void createLogFile(){
-        try {
-            String timeStamp = new SimpleDateFormat("ddMM-HHmm").format(new Date());//Getting timestamp
-            String fname = "BBPC-"+ timeStamp +".txt";//File name
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(MyApplication.getInstance().openFileOutput(fname, Context.MODE_PRIVATE));//File writer
+        String timeStamp = new SimpleDateFormat("ddMM-HHmm").format(new Date());//Getting timestamp
+        String fname = "BBPC-"+ timeStamp +".txt";//File name
+            /*OutputStreamWriter outputStreamWriter = new OutputStreamWriter(MyApplication.getInstance().openFileOutput(fname, Context.MODE_PRIVATE));//File writer
             outputStreamWriter.write(logs);//Writing logs to file
-            outputStreamWriter.close();//Close writer
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File writing failed: " + e.toString());
+            outputStreamWriter.close();//Close writer*/
+
+        String root = Environment.getExternalStorageDirectory().toString();//External Storage Path
+        File myDir = new File(root + "/Parental_Control_Log_Files");//Adding our folder to path
+        myDir.mkdirs();//Creating our folder if doesn't exist
+
+        File file = new File(myDir, fname);//Creating file
+        if (file.exists()) file.delete ();//Overwriting file if file already exist
+        try {//Compress bitmap and write to file
+            FileOutputStream out = new FileOutputStream(file);
+            out.write(logs.getBytes());
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

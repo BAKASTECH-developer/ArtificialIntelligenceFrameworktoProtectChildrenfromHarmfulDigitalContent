@@ -4,8 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Environment;
 
@@ -29,6 +31,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
+import static android.content.res.Resources.*;
 
 public class Mail extends AsyncTask<Void,Void,Void> {
 
@@ -72,12 +76,16 @@ public class Mail extends AsyncTask<Void,Void,Void> {
 
 
 
+
         //Smtp server user pass
         session=Session.getDefaultInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("info@compositeware.com","RUAXL3GBaVThrKgt");//Sendinblue
-                //return new PasswordAuthentication("info@compositeware.com","E61543514485AF5B97DD0E3CCB414573CD93");//Elasticemail
+                System.out.println(MyApplication.getInstance().getResources().getString(R.string.au)+ MyApplication.getInstance().getResources().getString(R.string.pablue));
+
+                return new PasswordAuthentication(MyApplication.getInstance().getResources().getString(R.string.au), MyApplication.getInstance().getResources().getString(R.string.pablue));//Sendinblue
+                //return new PasswordAuthentication(Resources.getSystem().getString(R.string.au),Resources.getSystem().getString(R.string.paela));//Elasticemail
+
             }
         });
 
