@@ -154,19 +154,7 @@ public class HomePageActivity extends AppCompatActivity {
         btn_startStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(startStopState==0){//If state is stop
-                    startStopState=1;//Set state as start
-                    btn_startStop.setText("Stop");//Set button text as Stop
-
-                    MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-                    startActivityForResult(projectionManager.createScreenCaptureIntent(),1);
-                }
-                else if(startStopState==1){//If state is start
-                    startStopState=0;//Set state as stop
-                    btn_startStop.setText("Start");//Set button text as Start
-                    lastLogFileDir=screenshotService.stopScreenshot();//Stop taking screenshots
-                    sendEmail();//Send email on stop
-                }
+                btnStartStopCall();
             }
         });
     }
@@ -178,9 +166,14 @@ public class HomePageActivity extends AppCompatActivity {
         if(screenshotService==null){//If no services bound
             doBindService();//Bind service
         }
+        else if(screenshotService.stoppedAtBackground==true){
+            startStopState=0;//Set state as stop
+            btn_startStop.setText("Start");//Set button text as Start
+        }
         final IntentFilter filter = new IntentFilter();// Intent filter
         filter.addAction("Mail_Sent");//Action mail sent
         registerReceiver(mailUpdateReceiver, filter);//Registering the broadcast receiver
+
     }
 
     //On activity pause
@@ -275,7 +268,7 @@ public class HomePageActivity extends AppCompatActivity {
 
     }
 
-    //Deletes all screenshots saved
+    /*//Deletes all screenshots saved
     private void deleteScreenshots(){
         //Picture folder path
         File folder = new File(Environment.getExternalStorageDirectory() + File.separator + "Parental_Control_Screenshots");
@@ -287,7 +280,7 @@ public class HomePageActivity extends AppCompatActivity {
         for(int i=imageFiles.length-1;i>=0;i--){
             imageFiles[i].delete();//Delete file
         }
-    }
+    }*/
 
 
     //Listening the broadcasts
@@ -298,7 +291,6 @@ public class HomePageActivity extends AppCompatActivity {
             switch (action) {
                 case "Mail_Sent"://Case of mail sending completed
                     dialog.dismiss();//Close dialog
-                    deleteScreenshots();//Delete screenshots
                     break;
 
                 default:
@@ -306,4 +298,21 @@ public class HomePageActivity extends AppCompatActivity {
             }
         }
     };
+
+    public void btnStartStopCall(){
+        if(startStopState==0){//If state is stop
+            startStopState=1;//Set state as start
+            btn_startStop.setText("Stop");//Set button text as Stop
+
+            MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            startActivityForResult(projectionManager.createScreenCaptureIntent(),1);
+
+        }
+        else if(startStopState==1){//If state is start
+            startStopState=0;//Set state as stop
+            btn_startStop.setText("Start");//Set button text as Start
+            lastLogFileDir=screenshotService.stopScreenshot();//Stop taking screenshots
+            sendEmail();//Send email on stop
+        }
+    }
 }

@@ -17,6 +17,7 @@ package bakas.it.artificialintelligenceframeworktoprotectchildrenfromharmfuldigi
  *      along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -75,6 +76,8 @@ public class ScreenshotService extends Service {
     private final IBinder mBinder = new LocalBinder();//Gets current service object
     String logs="";//Text that will be written to log file
     Classifier classifier=new Classifier();//Classifier object
+    int screenshotCount=0;//A counter for last screenshot session and counts the amount how many screenshot taken
+    public boolean stoppedAtBackground=false;// Shows if app stopped taking screenshots while on background
 
     public ScreenshotService() {//Empty constructor
     }
@@ -100,12 +103,14 @@ public class ScreenshotService extends Service {
         screenshotHandler.postDelayed(new Runnable() {//10 sec timer for screenshot
             @Override
             public void run() {
-                startScreenshot();//Start taking screenshots
-                String timeStamp = new SimpleDateFormat("dd.MM-HH:mm:ss").format(new Date());//Getting timestamp
-                logs+=timeStamp+" Safe\n";//Adding a new line to logs
-                screenshotHandler.postDelayed(this,10000);//creating loop with 10 secs delay
+                if(screenshotCount<2){
+                    startScreenshot();//Start taking screenshots
+                    String timeStamp = new SimpleDateFormat("dd.MM-HH:mm:ss").format(new Date());//Getting timestamp
+                    logs+=timeStamp+" Safe\n";//Adding a new line to logs
+                    screenshotHandler.postDelayed(this,10000);//creating loop with 10 secs delay
+                }
             }
-        }, 10000);//10 secs delay
+        }, 0);//0 secs delay
 
         return true;
     }
@@ -185,6 +190,11 @@ public class ScreenshotService extends Service {
                 saveBitmap(realSizeBitmap);//Saving bitmap
             }
         }, handler);
+
+        screenshotCount+=1;
+        if(screenshotCount==2){
+            finishSession();
+        }
     }
 
     //On stop button pressed it stops screen capturing and drops screenshotHandler timer
@@ -219,4 +229,18 @@ public class ScreenshotService extends Service {
         }
         return myDir+"/"+fname;
     }
+
+    private void finishSession(){
+        stoppedAtBackground=true;//finish flag
+        String lastLogFileDir=stopScreenshot();//Stop taking screenshots
+        sendEmail(lastLogFileDir);//Send email on stop
+    }
+
+    //Sending email of screenshots
+    public void sendEmail(final String lastLogFileDir)
+    {
+        Mail mail =new Mail(null,lastLogFileDir);//Create mail object
+        mail.execute();//Execute mail sending
+    }
+
 }

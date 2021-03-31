@@ -100,8 +100,7 @@ public class Mail extends AsyncTask<Void,Void,Void> {
         session=Session.getDefaultInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                //return new PasswordAuthentication("user","pass");
-                return new PasswordAuthentication("6ec4a6672e3df9ad145a3b961fa06718","aff5c992ef656874ccf73ea617580fee");
+                return new PasswordAuthentication("user","pass");
             }
         });
 
@@ -163,9 +162,12 @@ public class Mail extends AsyncTask<Void,Void,Void> {
     //Toast on sending completed
     @Override
     protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
-        broadcastUpdate("Mail_Sent");//Broadcast to close dialog
-        Toast.makeText(context,"Mail Sent",Toast.LENGTH_LONG).show();//Toast
+        if(context!=null){
+            super.onPostExecute(aVoid);
+            broadcastUpdate("Mail_Sent");//Broadcast to close dialog
+            Toast.makeText(context,"Mail Sent",Toast.LENGTH_LONG).show();//Toast
+        }
+
     }
 
     //Before executing mail sending
@@ -176,8 +178,10 @@ public class Mail extends AsyncTask<Void,Void,Void> {
 
     //Broadcast updater
     private void broadcastUpdate(final String action) {
-        final Intent intent = new Intent(action);
-        context.sendBroadcast(intent);
+        if(context!=null){
+            final Intent intent = new Intent(action);
+            context.sendBroadcast(intent);
+        }
     }
 
 }
