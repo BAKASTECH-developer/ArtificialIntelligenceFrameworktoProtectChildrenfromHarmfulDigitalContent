@@ -152,7 +152,3 @@ public class Classifier {
         return max_label; // Return max_label
     }
 }
-// Copyright (C) 2021 BAKAS IT - All Rights Reserved
-// You may use, distribute and modify this code under the
-// terms of an open license, citing our company <BAKAS IT>
-// as the open source provider for this code.

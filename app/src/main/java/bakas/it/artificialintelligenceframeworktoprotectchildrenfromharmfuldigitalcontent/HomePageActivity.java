@@ -91,6 +91,7 @@ public class HomePageActivity extends AppCompatActivity {
     public static ScreenshotService screenshotService;//Screenshot service that runs in background and takes screenshots
     private static boolean mServiceConnected;//Boolean value that shows if screenshot service is connected
     ProgressDialog dialog;//Mail sending dialog
+    String lastLogFileDir="";//Keeps the last log file's directory
 
     //Connects service
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -163,7 +164,7 @@ public class HomePageActivity extends AppCompatActivity {
                 else if(startStopState==1){//If state is start
                     startStopState=0;//Set state as stop
                     btn_startStop.setText("Start");//Set button text as Start
-                    screenshotService.stopScreenshot();//Stop taking screenshots
+                    lastLogFileDir=screenshotService.stopScreenshot();//Stop taking screenshots
                     sendEmail();//Send email on stop
                 }
             }
@@ -267,7 +268,7 @@ public class HomePageActivity extends AppCompatActivity {
         Handler handler1 = new Handler();//Timer to wait before mail sending due to problems can occur while stopping screenshot
         handler1.postDelayed(new Runnable() {
             public void run() {
-                Mail mail =new Mail(HomePageActivity.this);//Create mail object
+                Mail mail =new Mail(HomePageActivity.this,lastLogFileDir);//Create mail object
                 mail.execute();//Execute mail sending
             }
         }, 1000);   //1 seconds

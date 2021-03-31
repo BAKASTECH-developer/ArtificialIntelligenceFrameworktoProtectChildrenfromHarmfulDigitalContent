@@ -57,10 +57,14 @@ public class Mail extends AsyncTask<Void,Void,Void> {
     public String email="girayserter1@gmail.com";//Send to this email
     public String subject="Screenshots";//Email subject
     public String message="Screenshots from the last recording sessions has been attached";//Text part of email
+    public String logFileDir="";//Last log file's directory
+    public String logFileName="";//Last log file's name
 
     //Constructor
-    public Mail(Context context){
+    public Mail(Context context,String logFileDir){
         this.context=context;
+        this.logFileDir=logFileDir;
+        this.logFileName=logFileDir.substring(logFileDir.length()-18);
     }
 
 
@@ -96,7 +100,8 @@ public class Mail extends AsyncTask<Void,Void,Void> {
         session=Session.getDefaultInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("user","pass");
+                //return new PasswordAuthentication("user","pass");
+                return new PasswordAuthentication("6ec4a6672e3df9ad145a3b961fa06718","aff5c992ef656874ccf73ea617580fee");
             }
         });
 
@@ -126,6 +131,14 @@ public class Mail extends AsyncTask<Void,Void,Void> {
                 imgPart.setFileName(fileName);//Setting image file name
                 multipart.addBodyPart(imgPart);//Add image to mail
             }
+
+            MimeBodyPart logPart = new MimeBodyPart();
+            String file5 = logFileDir;
+            String fileName5 = logFileName;
+            DataSource source5 = new FileDataSource(file5);
+            logPart.setDataHandler(new DataHandler(source5));
+            logPart.setFileName(fileName5);
+            multipart.addBodyPart(logPart);
 
             MimeBodyPart textPart = new MimeBodyPart();//Text part for mail
             textPart.setText(message);//Setting text as message

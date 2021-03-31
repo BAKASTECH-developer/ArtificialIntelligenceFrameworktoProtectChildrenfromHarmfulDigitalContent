@@ -101,7 +101,8 @@ public class ScreenshotService extends Service {
             @Override
             public void run() {
                 startScreenshot();//Start taking screenshots
-                logs+="Safe\n";//Adding a new line to logs
+                String timeStamp = new SimpleDateFormat("dd.MM-HH:mm:ss").format(new Date());//Getting timestamp
+                logs+=timeStamp+" Safe\n";//Adding a new line to logs
                 screenshotHandler.postDelayed(this,10000);//creating loop with 10 secs delay
             }
         }, 10000);//10 secs delay
@@ -187,14 +188,15 @@ public class ScreenshotService extends Service {
     }
 
     //On stop button pressed it stops screen capturing and drops screenshotHandler timer
-    public void stopScreenshot(){
+    public String stopScreenshot(){
         screenshotHandler.removeCallbacksAndMessages(null);
         mProjection.stop();//Stopping screen capture
-        createLogFile();//Creating log file
+        String directory=createLogFile();//Creating log file
+        return directory;
     }
 
     //Creates log file with logs string and timestamp as name
-    public void createLogFile(){
+    public String createLogFile(){
         String timeStamp = new SimpleDateFormat("ddMM-HHmm").format(new Date());//Getting timestamp
         String fname = "BBPC-"+ timeStamp +".txt";//File name
             /*OutputStreamWriter outputStreamWriter = new OutputStreamWriter(MyApplication.getInstance().openFileOutput(fname, Context.MODE_PRIVATE));//File writer
@@ -215,5 +217,6 @@ public class ScreenshotService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return myDir+"/"+fname;
     }
 }
