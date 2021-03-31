@@ -78,6 +78,8 @@ public class ScreenshotService extends Service {
     Classifier classifier=new Classifier();//Classifier object
     int screenshotCount=0;//A counter for last screenshot session and counts the amount how many screenshot taken
     public boolean stoppedAtBackground=false;// Shows if app stopped taking screenshots while on background
+    int maxScreenshot=12;//Maximum amount of screenshot per season
+    String lastScreenshotsFileDir="";
 
     public ScreenshotService() {//Empty constructor
     }
@@ -96,15 +98,15 @@ public class ScreenshotService extends Service {
 
 
     //Starts auto screenshot and takes a screenshot every 10 secs
-    public boolean initialize(MediaProjection mProjection) {
-
+    public boolean initialize(MediaProjection mProjection, final String timeStamp) {
+        screenshotCount=0;
         this.mProjection=mProjection;//Currently running media projection
-
+        this.lastScreenshotsFileDir=Environment.getExternalStorageDirectory().toString()+"/Parental_Control_Screenshots/"+timeStamp;
         screenshotHandler.postDelayed(new Runnable() {//10 sec timer for screenshot
             @Override
             public void run() {
-                if(screenshotCount<12){
-                    startScreenshot();//Start taking screenshots
+                if(screenshotCount<maxScreenshot){
+                    startScreenshot(timeStamp);//Start taking screenshots
                     screenshotHandler.postDelayed(this,10000);//creating loop with 10 secs delay
                 }
             }
@@ -114,9 +116,8 @@ public class ScreenshotService extends Service {
     }
 
     //Gets a bitmap and compressing it to JPG and saving
-    public void saveBitmap(Bitmap bitmap) {
-        String root = Environment.getExternalStorageDirectory().toString();//External Storage Path
-        File myDir = new File(root + "/Parental_Control_Screenshots");//Adding our folder to path
+    public void saveBitmap(Bitmap bitmap,String newFolderName) {
+        File myDir = new File(lastScreenshotsFileDir);//Adding our folder to path
         myDir.mkdirs();//Creating our folder if doesn't exist
 
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());//Getting timestamp
@@ -141,7 +142,7 @@ public class ScreenshotService extends Service {
 
     //Gets media projection and placing it on image reader then saving it
     @SuppressLint("WrongConstant")
-    public void startScreenshot(){
+    public void startScreenshot(final String newFolderName){
         classifier.initialize();
         final MediaProjection Projection=mProjection;//copying the projection
         WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);//Getting device window manager
@@ -185,7 +186,7 @@ public class ScreenshotService extends Service {
                 Bitmap realSizeBitmap = Bitmap.createBitmap(bmp, 0, 0, metrics.widthPixels, bmp.getHeight());//Getting real size bitmap
                 bmp.recycle();
 
-                saveBitmap(realSizeBitmap);//Saving bitmap
+                saveBitmap(realSizeBitmap,newFolderName);//Saving bitmap
             }
         }, handler);
 
@@ -193,7 +194,7 @@ public class ScreenshotService extends Service {
         logs+=timeStamp+" Safe\n";//Adding a new line to logs
 
         screenshotCount+=1;
-        if(screenshotCount==12){
+        if(screenshotCount==maxScreenshot+1){
             finishSession();
         }
     }
@@ -240,7 +241,7 @@ public class ScreenshotService extends Service {
     //Sending email of screenshots
     public void sendEmail(final String lastLogFileDir)
     {
-        Mail mail =new Mail(null,lastLogFileDir);//Create mail object
+        Mail mail =new Mail(null,lastLogFileDir,lastScreenshotsFileDir);//Create mail object
         mail.execute();//Execute mail sending
     }
 

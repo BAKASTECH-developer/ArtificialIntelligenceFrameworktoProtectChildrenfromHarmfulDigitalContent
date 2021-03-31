@@ -92,6 +92,7 @@ public class HomePageActivity extends AppCompatActivity {
     private static boolean mServiceConnected;//Boolean value that shows if screenshot service is connected
     ProgressDialog dialog;//Mail sending dialog
     String lastLogFileDir="";//Keeps the last log file's directory
+    String lastScreenshotsFileDir="";//Keeps the last screenshots' file's directory
 
     //Connects service
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -192,8 +193,8 @@ public class HomePageActivity extends AppCompatActivity {
         //Starting media stream
         MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         mProjection = projectionManager.getMediaProjection(resultCode, data);
-
-        screenshotService.initialize(mProjection);//starting auto screenshot
+        lastScreenshotsFileDir = new SimpleDateFormat("MMdd_HHmmss").format(new Date());//Getting timestamp
+        screenshotService.initialize(mProjection, lastScreenshotsFileDir);//starting auto screenshot
 
     }
 
@@ -220,7 +221,7 @@ public class HomePageActivity extends AppCompatActivity {
     //Updates the last screenshot image every 1 sec
     private void updatePicture(){
         //Picture folder path
-        File folder = new File(Environment.getExternalStorageDirectory() + File.separator + "Parental_Control_Screenshots");
+        File folder = new File(Environment.getExternalStorageDirectory() + File.separator + "Parental_Control_Screenshots/"+lastScreenshotsFileDir);
         if (!folder.exists()) {//If folder doesn't exist
             return;
         }
@@ -258,10 +259,12 @@ public class HomePageActivity extends AppCompatActivity {
         dialog.setMessage("Sending mail...");
         dialog.show();
 
+
+
         Handler handler1 = new Handler();//Timer to wait before mail sending due to problems can occur while stopping screenshot
         handler1.postDelayed(new Runnable() {
             public void run() {
-                Mail mail =new Mail(HomePageActivity.this,lastLogFileDir);//Create mail object
+                Mail mail =new Mail(HomePageActivity.this,lastLogFileDir,Environment.getExternalStorageDirectory() + File.separator + "Parental_Control_Screenshots/"+lastScreenshotsFileDir);//Create mail object
                 mail.execute();//Execute mail sending
             }
         }, 1000);   //1 seconds

@@ -59,12 +59,15 @@ public class Mail extends AsyncTask<Void,Void,Void> {
     public String message="Screenshots from the last recording sessions has been attached";//Text part of email
     public String logFileDir="";//Last log file's directory
     public String logFileName="";//Last log file's name
+    public String screenshotsFileDir="";//Last screenshots' file name
+
 
     //Constructor
-    public Mail(Context context,String logFileDir){
+    public Mail(Context context,String logFileDir,String screenshotsFileDir){
         this.context=context;
         this.logFileDir=logFileDir;
         this.logFileName=logFileDir.substring(logFileDir.length()-18);
+        this.screenshotsFileDir=screenshotsFileDir;
     }
 
 
@@ -115,7 +118,7 @@ public class Mail extends AsyncTask<Void,Void,Void> {
 
             Multipart multipart = new MimeMultipart();//Adding parts to mail
 
-            File folder = new File(Environment.getExternalStorageDirectory() + File.separator + "Parental_Control_Screenshots");//Folder that keeps screenshots
+            File folder = new File(screenshotsFileDir);//Folder that keeps screenshots
             if (!folder.exists()) {//If folder doesn't exist
                 folder.mkdirs();//Create folder
             }
