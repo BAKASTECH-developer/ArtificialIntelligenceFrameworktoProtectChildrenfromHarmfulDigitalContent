@@ -103,10 +103,8 @@ public class ScreenshotService extends Service {
         screenshotHandler.postDelayed(new Runnable() {//10 sec timer for screenshot
             @Override
             public void run() {
-                if(screenshotCount<2){
+                if(screenshotCount<12){
                     startScreenshot();//Start taking screenshots
-                    String timeStamp = new SimpleDateFormat("dd.MM-HH:mm:ss").format(new Date());//Getting timestamp
-                    logs+=timeStamp+" Safe\n";//Adding a new line to logs
                     screenshotHandler.postDelayed(this,10000);//creating loop with 10 secs delay
                 }
             }
@@ -191,8 +189,11 @@ public class ScreenshotService extends Service {
             }
         }, handler);
 
+        String timeStamp = new SimpleDateFormat("dd.MM-HH:mm:ss").format(new Date());//Getting timestamp
+        logs+=timeStamp+" Safe\n";//Adding a new line to logs
+
         screenshotCount+=1;
-        if(screenshotCount==2){
+        if(screenshotCount==12){
             finishSession();
         }
     }

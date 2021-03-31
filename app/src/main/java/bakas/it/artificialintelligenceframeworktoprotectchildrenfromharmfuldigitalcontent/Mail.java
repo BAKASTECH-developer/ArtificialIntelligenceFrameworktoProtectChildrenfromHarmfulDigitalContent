@@ -100,7 +100,7 @@ public class Mail extends AsyncTask<Void,Void,Void> {
         session=Session.getDefaultInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("user","pass");
+                return new PasswordAuthentication(MyApplication.getInstance().getString(R.string.aumj),MyApplication.getInstance().getString(R.string.pamj));
             }
         });
 
