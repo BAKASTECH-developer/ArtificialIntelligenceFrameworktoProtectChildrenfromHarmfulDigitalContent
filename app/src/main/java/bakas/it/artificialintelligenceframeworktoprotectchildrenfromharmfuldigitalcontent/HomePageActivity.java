@@ -92,7 +92,7 @@ public class HomePageActivity extends AppCompatActivity {
     private static boolean mServiceConnected;//Boolean value that shows if screenshot service is connected
     ProgressDialog dialog;//Mail sending dialog
     String lastLogFileDir="";//Keeps the last log file's directory
-    String lastScreenshotsFileDir="";//Keeps the last screenshots' file's directory
+    String lastScreenshotsFileDir="invalid_path";//Keeps the last screenshots' file's directory
 
     //Connects service
     private final ServiceConnection mServiceConnection = new ServiceConnection() {

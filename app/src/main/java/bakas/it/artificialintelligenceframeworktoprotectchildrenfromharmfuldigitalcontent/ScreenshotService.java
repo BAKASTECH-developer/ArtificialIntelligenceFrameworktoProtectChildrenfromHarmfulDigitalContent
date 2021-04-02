@@ -34,9 +34,15 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.media.Image;
 import android.media.ImageReader;
@@ -127,6 +133,7 @@ public class ScreenshotService extends Service {
         if (file.exists()) file.delete ();//Overwriting file if file already exist
         try {//Compress bitmap and write to file
             FileOutputStream out = new FileOutputStream(file);
+            bitmap=drawTextToBitmap("SAFE",bitmap);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);//Saving screenshot
             Bitmap bmp=Bitmap.createScaledBitmap(bitmap, 600, 800, false);//Resizing to 800x600
             bmp=Bitmap.createBitmap(bmp, 0,100,600, 600);//Cropping top 100 and bottom 100 pixels
@@ -138,6 +145,41 @@ public class ScreenshotService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    //Draws text at the center of Bitmap
+    public Bitmap drawTextToBitmap(String gText,Bitmap bitmap) {
+
+        float scale = MyApplication.getInstance().getResources().getDisplayMetrics().density;
+        android.graphics.Bitmap.Config bitmapConfig =
+                bitmap.getConfig();
+        // set default bitmap config if none
+        if(bitmapConfig == null) {
+            bitmapConfig = android.graphics.Bitmap.Config.ARGB_8888;
+        }
+        // resource bitmaps are imutable,
+        // so we need to convert it to mutable one
+        bitmap = bitmap.copy(bitmapConfig, true);
+
+        Canvas canvas = new Canvas(bitmap);
+        // new antialised Paint
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        // text color - #3D3D3D
+        paint.setColor(Color.rgb(32, 197, 14));
+        // text size in pixels
+        paint.setTextSize((int) (20 * scale));
+        // text shadow
+        paint.setShadowLayer(1f, 0f, 1f, Color.WHITE);
+
+        // draw text to the Canvas center
+        Rect bounds = new Rect();
+        paint.getTextBounds(gText, 0, gText.length(), bounds);
+        int x = (bitmap.getWidth() - bounds.width())/2;
+        int y = (bitmap.getHeight() + bounds.height())/2;
+
+        canvas.drawText(gText, x, y, paint);
+
+        return bitmap;
     }
 
     //Gets media projection and placing it on image reader then saving it
