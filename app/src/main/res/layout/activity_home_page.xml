@@ -31,6 +31,16 @@
             android:textSize="25dp" />
 
         <Button
+            android:id="@+id/btn_menu"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_rectangle_button"
+            android:text="Menu"
+            android:textColor="#ffffff"
+            android:layout_marginTop="20dp"
+            />
+
+        <Button
             android:id="@+id/btn_start_stop"
             android:layout_width="150dp"
             android:layout_height="wrap_content"

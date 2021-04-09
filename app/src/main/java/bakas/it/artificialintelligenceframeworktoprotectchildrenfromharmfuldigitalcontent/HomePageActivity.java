@@ -80,6 +80,7 @@ public class HomePageActivity extends AppCompatActivity {
     ImageView lastScreenshot;//gallery grid view
     GridViewAdapter customGridAdapter;//Adapter for gallery grid view
     Button btn_startStop;//Start Stop button
+    Button btn_menu;
     TextView classifierResultText;
     MediaProjection mProjection;//Media Projection variable for screenshot
     int mWidth ;//Screen width
@@ -137,6 +138,7 @@ public class HomePageActivity extends AppCompatActivity {
         //Items from xml file
         lastScreenshot=findViewById(R.id.lastScreenshotImage);
         btn_startStop=findViewById(R.id.btn_start_stop);
+        btn_menu=findViewById(R.id.btn_menu);
         classifierResultText=findViewById(R.id.classifierResultText);
 
         //Starting gallery refreshing
@@ -157,6 +159,17 @@ public class HomePageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 btnStartStopCall();
+            }
+        });
+
+        //Listener for Menu button click
+        btn_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(startStopState==0){//If start stop button is on stop state
+                    Intent intent=new Intent(HomePageActivity.this,MenuActivity.class);
+                    startActivity(intent);//Start menu activity
+                }
             }
         });
     }
