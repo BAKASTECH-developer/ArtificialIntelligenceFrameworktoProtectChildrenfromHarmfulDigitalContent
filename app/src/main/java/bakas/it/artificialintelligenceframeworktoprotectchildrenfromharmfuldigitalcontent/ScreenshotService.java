@@ -85,7 +85,8 @@ public class ScreenshotService extends Service {
     int screenshotCount=0;//A counter for last screenshot session and counts the amount how many screenshot taken
     public boolean stoppedAtBackground=false;// Shows if app stopped taking screenshots while on background
     int maxScreenshot=12;//Maximum amount of screenshot per season
-    String lastScreenshotsFileDir="";
+    String lastScreenshotsFileDir="";//Direction of screenshots from last session
+    String predictionResult="";//Keeps the prediction result
 
     public ScreenshotService() {//Empty constructor
     }
@@ -122,29 +123,39 @@ public class ScreenshotService extends Service {
     }
 
     //Gets a bitmap and compressing it to JPG and saving
-    public void saveBitmap(Bitmap bitmap,String newFolderName) {
+    public String saveBitmap(Bitmap bitmap,String newFolderName) {
         File myDir = new File(lastScreenshotsFileDir);//Adding our folder to path
         myDir.mkdirs();//Creating our folder if doesn't exist
 
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());//Getting timestamp
         String fname = "Screenshot_"+ timeStamp +".jpg";//File name
-
+        String prediction="";//result of prediction;
         File file = new File(myDir, fname);//Creating file
         if (file.exists()) file.delete ();//Overwriting file if file already exist
         try {//Compress bitmap and write to file
             FileOutputStream out = new FileOutputStream(file);
-            bitmap=drawTextToBitmap("SAFE",bitmap);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);//Saving screenshot
             Bitmap bmp=Bitmap.createScaledBitmap(bitmap, 600, 800, false);//Resizing to 800x600
             bmp=Bitmap.createBitmap(bmp, 0,100,600, 600);//Cropping top 100 and bottom 100 pixels
             bmp=Bitmap.createScaledBitmap(bmp, 320, 320, false);//Resizing to 320x320
             classifier.classify(bmp);//Sending 320x320 bitmap to classifier
-            System.out.println(classifier.predict());//Writing out the result of prediction
+            prediction=classifier.predict();
+            if(prediction.equals("BAKAS BILISIM framework classification result: Normal Content")){
+                predictionResult="SAFE";
+            }else if(prediction.equals("BAKAS BILISIM framework classification result: Violence Content")){
+                predictionResult="VIOLENCE";
+            }else{
+                predictionResult="SEXUALITY";
+            }
+            bitmap=drawTextToBitmap(predictionResult,bitmap);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);//Saving screenshot
             out.flush();
             out.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return predictionResult;
+
     }
 
     //Draws text at the center of Bitmap
@@ -164,8 +175,13 @@ public class ScreenshotService extends Service {
         Canvas canvas = new Canvas(bitmap);
         // new antialised Paint
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        // text color - #3D3D3D
-        paint.setColor(Color.rgb(32, 197, 14));
+        // text color
+        if(gText=="SAFE") {
+            paint.setColor(Color.rgb(32, 197, 14));//green
+        }
+        else {
+            paint.setColor(Color.rgb(214, 53, 18));//red
+        }
         // text size in pixels
         paint.setTextSize((int) (20 * scale));
         // text shadow
@@ -228,12 +244,13 @@ public class ScreenshotService extends Service {
                 Bitmap realSizeBitmap = Bitmap.createBitmap(bmp, 0, 0, metrics.widthPixels, bmp.getHeight());//Getting real size bitmap
                 bmp.recycle();
 
-                saveBitmap(realSizeBitmap,newFolderName);//Saving bitmap
+                predictionResult=saveBitmap(realSizeBitmap,newFolderName);//Saving bitmap
+                String timeStamp = new SimpleDateFormat("dd.MM-HH:mm:ss").format(new Date());//Getting timestamp
+                logs+=timeStamp+" "+predictionResult+"\n";//Adding a new line to logs
             }
         }, handler);
 
-        String timeStamp = new SimpleDateFormat("dd.MM-HH:mm:ss").format(new Date());//Getting timestamp
-        logs+=timeStamp+" Safe\n";//Adding a new line to logs
+
 
         screenshotCount+=1;
         if(screenshotCount==maxScreenshot+1){

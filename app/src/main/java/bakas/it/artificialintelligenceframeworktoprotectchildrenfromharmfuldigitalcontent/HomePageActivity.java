@@ -35,6 +35,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -231,6 +232,19 @@ public class HomePageActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeFile(imageFiles[imageFiles.length - 1].getAbsolutePath());//Create bitmap from pictures
             lastScreenshot.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 600, 800, false));//Resizing to 800x600
             classifierResultText.setVisibility(View.VISIBLE);//Set prediction result text visible
+            if(screenshotService.predictionResult=="SAFE"){
+                classifierResultText.setText("SAFE");
+                classifierResultText.setTextColor(Color.GREEN);
+            }
+            else if (screenshotService.predictionResult=="VIOLENCE"){
+                classifierResultText.setText("VIOLENCE");
+                classifierResultText.setTextColor(Color.RED);
+            }
+            else if (screenshotService.predictionResult=="SEXUALITY"){
+                classifierResultText.setText("SEXUALITY");
+                classifierResultText.setTextColor(Color.RED);
+            }
+
         }
     }
 
