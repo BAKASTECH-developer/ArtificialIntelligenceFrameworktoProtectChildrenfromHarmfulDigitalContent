@@ -1,4 +1,3 @@
 BAKAS BILISIM framework classification result: Sexually Inappropriate Content
 BAKAS BILISIM framework classification result: Normal Content
-BAKAS BILISIM framework classification result: Suspicious Content
 BAKAS BILISIM framework classification result: Violence Content
