@@ -54,7 +54,7 @@ public class Mail extends AsyncTask<Void,Void,Void> {
 
     private Context context;//Context
     private Session session;//Session
-    public String email="girayserter1@gmail.com";//Send to this email
+    public String email="info@compositeware.com";//Send to this email
     public String subject="Screenshots";//Email subject
     public String message="Screenshots from the last recording sessions has been attached";//Text part of email
     public String logFileDir="";//Last log file's directory
