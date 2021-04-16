@@ -71,7 +71,7 @@ public class Classifier {
 
     private void inittflite() throws IOException {
         // Creating the model using tflite model
-        AssetFileDescriptor fileDescriptor= MyApplication.getInstance().getAssets().openFd("modelv3.6.tflite");
+        AssetFileDescriptor fileDescriptor= MyApplication.getInstance().getAssets().openFd("modelv3.9.tflite");
         FileInputStream inputStream=new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel=inputStream.getChannel();
         long startoffset = fileDescriptor.getStartOffset();
@@ -143,12 +143,20 @@ public class Classifier {
         float maxValueInMap =(Collections.max(labeledProbability.values()));
 
         // Loop through the map of labels&probabilities, get max probability label and assign it to max_label
-        for (Map.Entry<String, Float> entry : labeledProbability.entrySet()) {
-            if (entry.getValue()==maxValueInMap) {
-                max_label = entry.getKey();
-            }
+//        for (Map.Entry<String, Float> entry : labeledProbability.entrySet()) {
+//            if (entry.getValue()==maxValueInMap) {
+//                max_label = entry.getKey();
+//            }
+//        }
+
+        if(labeledProbability.get("BAKAS BILISIM framework classification result: Violence Content") >= 0.8){
+            return "BAKAS BILISIM framework classification result: Violence Content";
+        }else if (labeledProbability.get("BAKAS BILISIM framework classification result: Normal Content") >= 0.7){
+            return "BAKAS BILISIM framework classification result: Normal Content";
+        }else {
+            return "BAKAS BILISIM framework classification result: Suspicious Content";
         }
 
-        return max_label; // Return max_label
+        //return max_label; // Return max_label
     }
 }
