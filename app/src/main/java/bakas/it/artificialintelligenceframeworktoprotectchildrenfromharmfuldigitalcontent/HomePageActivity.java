@@ -58,6 +58,7 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.Console;
 import java.io.File;
@@ -71,6 +72,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 import bakas.it.artificialintelligenceframeworktoprotectchildrenfromharmfuldigitalcontent.R;
@@ -95,6 +97,10 @@ public class HomePageActivity extends AppCompatActivity {
     ProgressDialog dialog;//Mail sending dialog
     String lastLogFileDir="";//Keeps the last log file's directory
     String lastScreenshotsFileDir="invalid_path";//Keeps the last screenshots' file's directory
+    SessionManagement session;//Class for keeping user settings
+    HashMap<String, String> userPrefs;
+    int interval,fileAmount;
+    String userId;
 
     //Connects service
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -128,6 +134,17 @@ public class HomePageActivity extends AppCompatActivity {
         //Setting toolbar as designed
         Toolbar toolbar=findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        session = new SessionManagement(getApplicationContext());
+        userPrefs = session.getUserDetails();
+        if(userPrefs.get(SessionManagement.KEY_INTERVAL)==null){
+            session.setInterval("10");
+        }
+        else {
+            interval = Integer.parseInt(userPrefs.get(SessionManagement.KEY_INTERVAL));
+        }
+
+
 
         //Checking write on disk permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
@@ -208,7 +225,7 @@ public class HomePageActivity extends AppCompatActivity {
         MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         mProjection = projectionManager.getMediaProjection(resultCode, data);
         lastScreenshotsFileDir = new SimpleDateFormat("MMdd_HHmmss").format(new Date());//Getting timestamp
-        screenshotService.initialize(mProjection, lastScreenshotsFileDir);//starting auto screenshot
+        screenshotService.initialize(mProjection, lastScreenshotsFileDir,interval);//starting auto screenshot
 
     }
 
@@ -334,6 +351,8 @@ public class HomePageActivity extends AppCompatActivity {
             startStopState=1;//Set state as start
             btn_startStop.setText("Stop");//Set button text as Stop
 
+            updatePrefs();
+
             MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
             startActivityForResult(projectionManager.createScreenCaptureIntent(),1);
 
@@ -343,6 +362,16 @@ public class HomePageActivity extends AppCompatActivity {
             btn_startStop.setText("Start");//Set button text as Start
             lastLogFileDir=screenshotService.stopScreenshot();//Stop taking screenshots
             sendEmail();//Send email on stop
+        }
+    }
+
+    public void updatePrefs(){
+        userPrefs = session.getUserDetails();
+        if(userPrefs.get(SessionManagement.KEY_INTERVAL)==null){
+            session.setInterval("10");
+        }
+        else {
+            interval = Integer.parseInt(userPrefs.get(SessionManagement.KEY_INTERVAL));
         }
     }
 }

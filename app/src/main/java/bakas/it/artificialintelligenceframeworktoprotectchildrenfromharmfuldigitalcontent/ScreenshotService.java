@@ -105,7 +105,7 @@ public class ScreenshotService extends Service {
 
 
     //Starts auto screenshot and takes a screenshot every 10 secs
-    public boolean initialize(MediaProjection mProjection, final String timeStamp) {
+    public boolean initialize(MediaProjection mProjection, final String timeStamp, final int interval) {
         screenshotCount=0;
         this.mProjection=mProjection;//Currently running media projection
         this.lastScreenshotsFileDir=Environment.getExternalStorageDirectory().toString()+"/Parental_Control_Screenshots/"+timeStamp;
@@ -114,7 +114,7 @@ public class ScreenshotService extends Service {
             public void run() {
                 if(screenshotCount<maxScreenshot){
                     startScreenshot(timeStamp);//Start taking screenshots
-                    screenshotHandler.postDelayed(this,10000);//creating loop with 10 secs delay
+                    screenshotHandler.postDelayed(this,interval*1000);//creating loop with value of interval secs delay
                 }
             }
         }, 0);//0 secs delay
@@ -144,7 +144,7 @@ public class ScreenshotService extends Service {
             }else if(prediction.equals("BAKAS BILISIM framework classification result: Violence Content")){
                 predictionResult="VIOLENCE";
             }else{
-                predictionResult="SEXUALITY";
+                predictionResult="SUSPICIOUS";
             }
             bitmap=drawTextToBitmap(predictionResult,bitmap);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);//Saving screenshot
@@ -178,6 +178,9 @@ public class ScreenshotService extends Service {
         // text color
         if(gText=="SAFE") {
             paint.setColor(Color.rgb(32, 197, 14));//green
+        }
+        else if(gText=="SUSPICIOUS") {
+            paint.setColor(Color.rgb(214, 209, 56));//yellow
         }
         else {
             paint.setColor(Color.rgb(214, 53, 18));//red
