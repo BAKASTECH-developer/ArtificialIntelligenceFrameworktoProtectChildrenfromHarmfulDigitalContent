@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.util.HashMap;
@@ -15,8 +16,10 @@ public class MenuActivity extends AppCompatActivity {
 
     Spinner spInterval;
     Spinner spFileAmount;
+    EditText txtUserId;
     Button save;
     int interval=10;
+    String userId="";
 
     SessionManagement session;
 
@@ -40,6 +43,7 @@ public class MenuActivity extends AppCompatActivity {
 
         spInterval=findViewById(R.id.sp_set_interval);
         spFileAmount=findViewById(R.id.sp_set_file_number);
+        txtUserId=findViewById(R.id.txt_set_user_id);
         save=findViewById(R.id.btn_save);
 
         ArrayAdapter adapter=new ArrayAdapter(this, R.layout.spinner_item,intervals);
@@ -50,10 +54,13 @@ public class MenuActivity extends AppCompatActivity {
 
         interval=Integer.parseInt(userPrefs.get(SessionManagement.KEY_INTERVAL));
         spInterval.setSelection(interval-1);
+
+        userId=String.valueOf(userPrefs.get(SessionManagement.KEY_USER_ID));
+        txtUserId.setText(userId);
     }
 
     public void save_button(View view){
-        session.saveUserPref("",String.valueOf(spInterval.getSelectedItemPosition()+1),"");
+        session.saveUserPref(txtUserId.getText().toString(),String.valueOf(spInterval.getSelectedItemPosition()+1),"");
         finish();
     }
 

@@ -66,6 +66,7 @@ import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -87,6 +88,8 @@ public class ScreenshotService extends Service {
     int maxScreenshot=12;//Maximum amount of screenshot per season
     String lastScreenshotsFileDir="";//Direction of screenshots from last session
     String predictionResult="";//Keeps the prediction result
+    SessionManagement session;//Class for keeping user settings
+    HashMap<String, String> userPrefs;
 
     public ScreenshotService() {//Empty constructor
     }
@@ -106,7 +109,12 @@ public class ScreenshotService extends Service {
 
     //Starts auto screenshot and takes a screenshot every 10 secs
     public boolean initialize(MediaProjection mProjection, final String timeStamp, final int interval) {
-        screenshotCount=0;
+        screenshotCount=0;//Reset taken screenshots counter
+        session = new SessionManagement(getApplicationContext());
+        userPrefs = session.getUserDetails();
+        if(getUserId()!=""){
+            logs=getUserId()+"\n";
+        }
         this.mProjection=mProjection;//Currently running media projection
         this.lastScreenshotsFileDir=Environment.getExternalStorageDirectory().toString()+"/Parental_Control_Screenshots/"+timeStamp;
         screenshotHandler.postDelayed(new Runnable() {//10 sec timer for screenshot
@@ -114,7 +122,7 @@ public class ScreenshotService extends Service {
             public void run() {
                 if(screenshotCount<maxScreenshot){
                     startScreenshot(timeStamp);//Start taking screenshots
-                    screenshotHandler.postDelayed(this,interval*1000);//creating loop with value of interval secs delay
+                    screenshotHandler.postDelayed(this,getInterval()*1000);//creating loop with value of interval secs delay
                 }
             }
         }, 0);//0 secs delay
@@ -291,6 +299,7 @@ public class ScreenshotService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        logs="";//Reset logs
         return myDir+"/"+fname;
     }
 
@@ -298,6 +307,7 @@ public class ScreenshotService extends Service {
         stoppedAtBackground=true;//finish flag
         String lastLogFileDir=stopScreenshot();//Stop taking screenshots
         sendEmail(lastLogFileDir);//Send email on stop
+
     }
 
     //Sending email of screenshots
@@ -305,6 +315,13 @@ public class ScreenshotService extends Service {
     {
         Mail mail =new Mail(null,lastLogFileDir,lastScreenshotsFileDir);//Create mail object
         mail.execute();//Execute mail sending
+    }
+
+    private int getInterval(){
+        return Integer.parseInt(userPrefs.get(SessionManagement.KEY_INTERVAL));
+    }
+    private String getUserId(){
+        return String.valueOf(userPrefs.get(SessionManagement.KEY_USER_ID));
     }
 
 }
