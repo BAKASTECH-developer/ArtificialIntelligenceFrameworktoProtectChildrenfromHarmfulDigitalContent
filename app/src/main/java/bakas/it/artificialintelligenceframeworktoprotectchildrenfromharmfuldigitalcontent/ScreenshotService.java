@@ -120,7 +120,7 @@ public class ScreenshotService extends Service {
         screenshotHandler.postDelayed(new Runnable() {//10 sec timer for screenshot
             @Override
             public void run() {
-                if(screenshotCount<maxScreenshot){
+                if(screenshotCount<getFileAmount()){
                     startScreenshot(timeStamp);//Start taking screenshots
                     screenshotHandler.postDelayed(this,getInterval()*1000);//creating loop with value of interval secs delay
                 }
@@ -264,7 +264,7 @@ public class ScreenshotService extends Service {
 
 
         screenshotCount+=1;
-        if(screenshotCount==maxScreenshot+1){
+        if(screenshotCount==getFileAmount()){
             finishSession();
         }
     }
@@ -319,6 +319,9 @@ public class ScreenshotService extends Service {
 
     private int getInterval(){
         return Integer.parseInt(userPrefs.get(SessionManagement.KEY_INTERVAL));
+    }
+    private int getFileAmount(){
+        return Integer.parseInt(userPrefs.get(SessionManagement.KEY_FILE_AMOUNT));
     }
     private String getUserId(){
         return String.valueOf(userPrefs.get(SessionManagement.KEY_USER_ID));

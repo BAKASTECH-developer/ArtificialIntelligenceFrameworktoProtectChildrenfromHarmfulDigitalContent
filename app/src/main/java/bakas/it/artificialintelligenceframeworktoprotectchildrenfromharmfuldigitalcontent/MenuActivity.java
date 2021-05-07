@@ -19,6 +19,7 @@ public class MenuActivity extends AppCompatActivity {
     EditText txtUserId;
     Button save;
     int interval=10;
+    int fileAmount=10;
     String userId="";
 
     SessionManagement session;
@@ -46,9 +47,13 @@ public class MenuActivity extends AppCompatActivity {
         txtUserId=findViewById(R.id.txt_set_user_id);
         save=findViewById(R.id.btn_save);
 
-        ArrayAdapter adapter=new ArrayAdapter(this, R.layout.spinner_item,intervals);
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spInterval.setAdapter(adapter);
+        ArrayAdapter adapterInterval=new ArrayAdapter(this, R.layout.spinner_item,intervals);
+        adapterInterval.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spInterval.setAdapter(adapterInterval);
+
+        ArrayAdapter adapterFileAmount=new ArrayAdapter(this, R.layout.spinner_item,fileAmounts);
+        adapterFileAmount.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spFileAmount.setAdapter(adapterFileAmount);
 
         HashMap<String, String> userPrefs = session.getUserDetails();
 
@@ -57,10 +62,13 @@ public class MenuActivity extends AppCompatActivity {
 
         userId=String.valueOf(userPrefs.get(SessionManagement.KEY_USER_ID));
         txtUserId.setText(userId);
+
+        fileAmount=Integer.parseInt(userPrefs.get(SessionManagement.KEY_FILE_AMOUNT));
+        spFileAmount.setSelection(fileAmount-1);
     }
 
     public void save_button(View view){
-        session.saveUserPref(txtUserId.getText().toString(),String.valueOf(spInterval.getSelectedItemPosition()+1),"");
+        session.saveUserPref(txtUserId.getText().toString(),String.valueOf(spInterval.getSelectedItemPosition()+1),String.valueOf(spFileAmount.getSelectedItemPosition()+1));
         finish();
     }
 

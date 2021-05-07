@@ -143,7 +143,12 @@ public class HomePageActivity extends AppCompatActivity {
         else {
             interval = Integer.parseInt(userPrefs.get(SessionManagement.KEY_INTERVAL));
         }
-
+        if(userPrefs.get(SessionManagement.KEY_FILE_AMOUNT)==null){
+            session.setFileAmount("10");
+        }
+        else {
+            fileAmount = Integer.parseInt(userPrefs.get(SessionManagement.KEY_FILE_AMOUNT));
+        }
 
 
         //Checking write on disk permission
@@ -372,6 +377,12 @@ public class HomePageActivity extends AppCompatActivity {
         }
         else {
             interval = Integer.parseInt(userPrefs.get(SessionManagement.KEY_INTERVAL));
+        }
+        if(userPrefs.get(SessionManagement.KEY_FILE_AMOUNT)==null){
+            session.setFileAmount("10");
+        }
+        else {
+            fileAmount = Integer.parseInt(userPrefs.get(SessionManagement.KEY_FILE_AMOUNT));
         }
     }
 }
