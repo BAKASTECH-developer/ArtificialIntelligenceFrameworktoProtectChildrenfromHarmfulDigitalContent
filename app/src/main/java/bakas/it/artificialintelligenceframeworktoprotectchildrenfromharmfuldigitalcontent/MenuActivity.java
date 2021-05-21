@@ -2,9 +2,9 @@ package bakas.it.artificialintelligenceframeworktoprotectchildrenfromharmfuldigi
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -73,4 +73,8 @@ public class MenuActivity extends AppCompatActivity {
     }
 
 
+    public void help_button(View view){
+        Intent intent=new Intent(this, HelpActivity.class);
+        startActivity(intent);
+    }
 }
