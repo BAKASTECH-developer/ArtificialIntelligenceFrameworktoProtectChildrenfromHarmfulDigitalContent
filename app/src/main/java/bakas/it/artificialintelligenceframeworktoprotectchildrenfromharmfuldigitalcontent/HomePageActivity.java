@@ -77,6 +77,8 @@ import java.util.Locale;
 
 import bakas.it.artificialintelligenceframeworktoprotectchildrenfromharmfuldigitalcontent.R;
 
+// deneme
+
 public class HomePageActivity extends AppCompatActivity {
 
     ImageView lastScreenshot;//gallery grid view
