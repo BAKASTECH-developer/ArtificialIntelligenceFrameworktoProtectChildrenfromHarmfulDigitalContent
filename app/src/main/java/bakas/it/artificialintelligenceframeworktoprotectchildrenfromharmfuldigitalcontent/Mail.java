@@ -27,9 +27,16 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Environment;
 
+import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -97,6 +104,16 @@ public class Mail extends AsyncTask<Void,Void,Void> {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.port", "587");
         props.setProperty("mail.smtp.quitwait", "false");
+
+
+        //  ############################# //
+
+        String ret = readFromFile(context);
+        if (!TextUtils.isEmpty(ret)) {
+            email = ret;
+        }
+
+        //  ############################# //
 
 
         //Smtp server user pass
@@ -186,5 +203,41 @@ public class Mail extends AsyncTask<Void,Void,Void> {
             context.sendBroadcast(intent);
         }
     }
+
+    //  ############################# //
+
+    private String readFromFile(Context context) {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = context.openFileInput("mail.txt");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        Log.e("login activity", ret);
+
+        return ret;
+    }
+
+    //  ############################# //
 
 }

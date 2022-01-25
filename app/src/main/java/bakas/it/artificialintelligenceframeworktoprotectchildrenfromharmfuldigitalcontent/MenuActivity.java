@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -54,7 +55,7 @@ public class MenuActivity extends AppCompatActivity {
         spInterval = findViewById(R.id.sp_set_interval);
         spFileAmount = findViewById(R.id.sp_set_file_number);
         txtUserId = findViewById(R.id.txt_set_user_id);
-        txtMailId = findViewById(R.id.txt_set_mail_id);
+        txtMailId = findViewById(R.id.txt_set_mail_id);  //  ############################# //
         save = findViewById(R.id.btn_save);
 
         ArrayAdapter adapterInterval = new ArrayAdapter(this, R.layout.spinner_item, intervals);
@@ -76,13 +77,24 @@ public class MenuActivity extends AppCompatActivity {
         fileAmount = Integer.parseInt(userPrefs.get(SessionManagement.KEY_FILE_AMOUNT));
         spFileAmount.setSelection(fileAmount - 1);
 
-        writeToFile("eeeeeeeeeeeeee", getApplicationContext());
-        readFromFile(getApplicationContext());
+        //  ############################# //
+
+        String ret = readFromFile(getApplicationContext());
+
+        if (!TextUtils.isEmpty(ret)) {
+            txtMailId.setText(ret);
+        }
+
+        //  ############################# //
+
+
+
 
     }
 
     public void save_button(View view) {
         session.saveUserPref(txtUserId.getText().toString(), String.valueOf(spInterval.getSelectedItemPosition() + 1), String.valueOf(spFileAmount.getSelectedItemPosition() + 1));
+        writeToFile(txtMailId.getText().toString(), getApplicationContext());
         finish();
     }
 
@@ -91,10 +103,12 @@ public class MenuActivity extends AppCompatActivity {
         Intent intent = new Intent(this, HelpActivity.class);
         startActivity(intent);
     }
+    
+    //  ############################# //
 
     private void writeToFile(String data,Context context) {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("config.txt", Context.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("mail.txt", Context.MODE_PRIVATE));
             outputStreamWriter.write(data);
             outputStreamWriter.close();
         }
@@ -108,7 +122,7 @@ public class MenuActivity extends AppCompatActivity {
         String ret = "";
 
         try {
-            InputStream inputStream = context.openFileInput("config.txt");
+            InputStream inputStream = context.openFileInput("mail.txt");
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -134,4 +148,6 @@ public class MenuActivity extends AppCompatActivity {
 
         return ret;
     }
+
+    //  ############################# //
 }
