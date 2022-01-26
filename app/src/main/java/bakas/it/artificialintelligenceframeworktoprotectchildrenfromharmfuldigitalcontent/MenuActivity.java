@@ -103,9 +103,9 @@ public class MenuActivity extends AppCompatActivity {
         Intent intent = new Intent(this, HelpActivity.class);
         startActivity(intent);
     }
-    
-    //  ############################# //
 
+    //  ############################# //
+    
     private void writeToFile(String data,Context context) {
         try {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("mail.txt", Context.MODE_PRIVATE));
